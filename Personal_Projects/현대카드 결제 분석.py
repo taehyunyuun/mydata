@@ -1,3 +1,7 @@
+"""
+현대카드 홈페이지 >> 카드 이용내역(매출전표조회) 엑셀 파일 다운로드 후 csv로 변환
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc

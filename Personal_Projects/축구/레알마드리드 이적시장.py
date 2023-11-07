@@ -12,6 +12,14 @@ rc('font', family=font)
 # 데이터 경로
 path_1415 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv'
 path_1516 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1516.csv'
+path_1617 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1617.csv'
+path_1718 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1718.csv'
+path_1819 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1819.csv'
+path_1920 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1920.csv'
+path_2021 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2021.csv'
+path_2122 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2122.csv'
+path_2223 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2223.csv'
+path_2324 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2324.csv'
 """
 file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
               'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1516.csv',
@@ -27,3 +35,45 @@ file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
 
 RM_transfer_1415 = pd.read_csv(path_1415, header=2)
 RM_transfer_1516 = pd.read_csv(path_1516, header=2)
+RM_transfer_1617 = pd.read_csv(path_1617, header=2)
+RM_transfer_1718 = pd.read_csv(path_1718, header=2)
+RM_transfer_1819 = pd.read_csv(path_1819, header=2)
+RM_transfer_1920 = pd.read_csv(path_1920, header=2)
+RM_transfer_2021 = pd.read_csv(path_2021, header=2)
+RM_transfer_2122 = pd.read_csv(path_2122, header=2)
+RM_transfer_2223 = pd.read_csv(path_2223, header=2)
+RM_transfer_2324 = pd.read_csv(path_2324, header=2)
+
+#tot_spending_1415 = RM_transfer_1415
+#avg_spending_1415 = RM_transfer_1415['이적료(유로)'].mean()
+"""
+def mean_calculator(season):
+    
+    for i in range(len(season['이적료(유로)'])):
+        tot_spending = 0
+        tot_spending = tot_spending + season['이적료(유로)'].iloc[i]
+        
+        if (season['이적료(유로)'][i] > 0):
+            tot_spending = tot_spending - season['이적료(유로)'].iloc[i]
+            
+            
+    return tot_spending
+"""
+tot_spending = 0
+count = 0
+for i in range(len(RM_transfer_1415['이적료(유로)'])):
+    tot_spending = tot_spending + RM_transfer_1415['이적료(유로)'].iloc[i]
+    count += 1
+    
+    if (RM_transfer_1415['이적료(유로)'].iloc[i] > 0):
+        tot_spending = tot_spending - RM_transfer_1415['이적료(유로)'].iloc[i]
+        count -= 1
+        
+
+tot_spending = tot_spending * -1
+avg_spending = tot_spending / count
+
+print(tot_spending)
+print(avg_spending)
+print(len(RM_transfer_1415['이적료(유로)']))
+#print(mean_calculator(RM_transfer_1415))

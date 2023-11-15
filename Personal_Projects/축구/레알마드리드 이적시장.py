@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 from matplotlib.ticker import FuncFormatter
 import os
+import re
 
 # 폰트 설정
 font_path = "C:/Windows/Fonts/malgun.TTF"
@@ -20,7 +21,7 @@ path_2021 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2021.csv'
 path_2122 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2122.csv'
 path_2223 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2223.csv'
 path_2324 = 'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2324.csv'
-"""
+
 file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
               'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1516.csv',
               'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1617.csv',
@@ -31,7 +32,10 @@ file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
               'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2122.csv',
               'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2223.csv',
               'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2324.csv']
-"""
+
+# 시즌 숫자를 문자열 형태로 리스트에 저장
+season_nums = [re.findall(r'\d+', path)[-1] for path in file_paths]
+print(season_nums)
 
 RM_transfer_1415 = pd.read_csv(path_1415, header=2)
 RM_transfer_1516 = pd.read_csv(path_1516, header=2)
@@ -59,6 +63,30 @@ def mean_calculator(season):
             
     return tot_spending
 """
+
+def yearly_transfer_arrangement(season):
+    
+    tot_spending = 0
+    count = 0
+    
+    for i in range(len(season['이적료(유로)'])):
+        tot_spending = tot_spending + season['이적료(유로)'].iloc[i]
+        count += 1
+        
+        if (season['이적료(유로)'].iloc[i] > 0):
+            tot_spending = tot_spending - season['이적료(유로)'].iloc[i]
+            count -= 1
+
+    tot_spending = tot_spending * -1
+    avg_spending = tot_spending / count
+
+    print("{} 시즌 총 이적료 : {:,} 유로".format(season_nums[0], tot_spending))
+    print(avg_spending)
+    print(len(season['이적료(유로)']))
+    
+yearly_transfer_arrangement(RM_transfer_1415)
+    
+"""
 tot_spending = 0
 count = 0
 for i in range(len(RM_transfer_1415['이적료(유로)'])):
@@ -68,12 +96,12 @@ for i in range(len(RM_transfer_1415['이적료(유로)'])):
     if (RM_transfer_1415['이적료(유로)'].iloc[i] > 0):
         tot_spending = tot_spending - RM_transfer_1415['이적료(유로)'].iloc[i]
         count -= 1
-        
 
 tot_spending = tot_spending * -1
 avg_spending = tot_spending / count
 
-print(tot_spending)
+print("총 이적료", tot_spending)
 print(avg_spending)
 print(len(RM_transfer_1415['이적료(유로)']))
 #print(mean_calculator(RM_transfer_1415))
+"""

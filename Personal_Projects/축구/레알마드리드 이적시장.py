@@ -48,60 +48,103 @@ RM_transfer_2122 = pd.read_csv(path_2122, header=2)
 RM_transfer_2223 = pd.read_csv(path_2223, header=2)
 RM_transfer_2324 = pd.read_csv(path_2324, header=2)
 
-#tot_spending_1415 = RM_transfer_1415
-#avg_spending_1415 = RM_transfer_1415['이적료(유로)'].mean()
-"""
-def mean_calculator(season):
-    
-    for i in range(len(season['이적료(유로)'])):
-        tot_spending = 0
-        tot_spending = tot_spending + season['이적료(유로)'].iloc[i]
-        
-        if (season['이적료(유로)'][i] > 0):
-            tot_spending = tot_spending - season['이적료(유로)'].iloc[i]
-            
-            
-    return tot_spending
-"""
+season_lists = [RM_transfer_1415,
+                RM_transfer_1516,
+                RM_transfer_1617,
+                RM_transfer_1718,
+                RM_transfer_1819,
+                RM_transfer_1920,
+                RM_transfer_2021,
+                RM_transfer_2122,
+                RM_transfer_2223,
+                RM_transfer_2324]
 
+for df in season_lists:
+    tot_spending = 0
+    tot_income = 0
+    spending_count = 0
+    income_count = 0
+    season_count = 0
+    
+    tot_spending = df[df['이적 형태'] == 'Arrival']['이적료(유로)'].sum()
+    tot_spending = tot_spending * -1
+    spending_count = len(df[df['이적 형태'] == 'Arrival']['이적료(유로)'])
+    avg_spending = round(tot_spending / spending_count)
+    
+    tot_income = df[df['이적 형태'] == 'Departure']['이적료(유로)'].sum()
+    income_count = len(df[df['이적 형태'] == 'Departure']['이적료(유로)'])
+    avg_income = round(tot_income / income_count)
+
+    FA_arrival_nums = df[(df['이적 형태'] == 'Arrival') & (df['기타'] == 'FA')].shape[0]
+    Loan_arrival_nums = df[(df['이적 형태'] == 'Arrival') & (df['기타'] == 'Loan')].shape[0]
+    Callup_nums = df[(df['이적 형태'] == 'Arrival') & (df['기타'] == 'Call up')].shape[0]
+    
+    tot_departure_nums = len(df['이적료(유로)']) - spending_count
+    FA_departure_nums = df[(df['이적 형태'] == 'Departure') & (df['기타'] == 'FA')].shape[0]
+    Loan_departure_nums = df[(df['이적 형태'] == 'Departure') & (df['기타'] == 'Loan')].shape[0]
+
+    print("-----------------------")
+    print("{} 시즌 총 이적료 지출 : {:,} 유로".format(season_nums[season_count], tot_spending))
+    print("인당 평균 이적료 지출 : {:,} 유로\n".format(avg_spending))
+    
+    print("총 영입 인원 : {} 명".format(spending_count))
+    print("FA 영입 인원 : {} 명".format(FA_arrival_nums))
+    print("임대 영입 인원 : {} 명".format(Loan_arrival_nums))
+    print("유스 콜업 인원 : {} 명".format(Callup_nums))
+    print("-----------------------")
+    print("{} 시즌 총 이적료 수입 : {:,} 유로".format(season_nums[season_count], tot_income))
+    print("인당 평균 이적료 수입 : {:,} 유로\n".format(avg_income))
+    print("총 방출 인원 : {} 명".format(tot_departure_nums))
+    print("FA 방출 인원 : {} 명".format(FA_departure_nums))
+    print("임대 이적 인원 : {} 명".format(Loan_departure_nums))
+    print("-----------------------")
+    season_count += 1
+"""
 def yearly_transfer_arrangement(season):
     
     tot_spending = 0
-    count = 0
+    tot_income = 0
+    spending_count = 0
+    income_count = 0
+    season_count = 2
     
-    for i in range(len(season['이적료(유로)'])):
-        tot_spending = tot_spending + season['이적료(유로)'].iloc[i]
-        count += 1
-        
-        if (season['이적료(유로)'].iloc[i] > 0):
-            tot_spending = tot_spending - season['이적료(유로)'].iloc[i]
-            count -= 1
-
+    tot_spending = season[season['이적 형태'] == 'Arrival']['이적료(유로)'].sum()
     tot_spending = tot_spending * -1
-    avg_spending = tot_spending / count
+    spending_count = len(season[season['이적 형태'] == 'Arrival']['이적료(유로)'])
+    avg_spending = round(tot_spending / spending_count)
+    
+    tot_income = season[season['이적 형태'] == 'Departure']['이적료(유로)'].sum()
+    income_count = len(season[season['이적 형태'] == 'Departure']['이적료(유로)'])
+    avg_income = round(tot_income / income_count)
 
-    print("{} 시즌 총 이적료 : {:,} 유로".format(season_nums[0], tot_spending))
-    print(avg_spending)
-    print(len(season['이적료(유로)']))
+    FA_arrival_nums = season[(season['이적 형태'] == 'Arrival') & (season['기타'] == 'FA')].shape[0]
+    Loan_arrival_nums = season[(season['이적 형태'] == 'Arrival') & (season['기타'] == 'Loan')].shape[0]
+    Callup_nums = season[(season['이적 형태'] == 'Arrival') & (season['기타'] == 'Call up')].shape[0]
     
-yearly_transfer_arrangement(RM_transfer_1415)
+    tot_departure_nums = len(season['이적료(유로)']) - spending_count
+    FA_departure_nums = season[(season['이적 형태'] == 'Departure') & (season['기타'] == 'FA')].shape[0]
+    Loan_departure_nums = season[(season['이적 형태'] == 'Departure') & (season['기타'] == 'Loan')].shape[0]
+
+    print("-----------------------")
+    print("{} 시즌 총 이적료 지출 : {:,} 유로".format(season_nums[season_count], tot_spending))
+    print("인당 평균 이적료 지출 : {:,} 유로\n".format(avg_spending))
     
+    print("총 영입 인원 : {} 명".format(spending_count))
+    print("FA 영입 인원 : {} 명".format(FA_arrival_nums))
+    print("임대 영입 인원 : {} 명".format(Loan_arrival_nums))
+    print("유스 콜업 인원 : {} 명".format(Callup_nums))
+    print("-----------------------")
+    print("{} 시즌 총 이적료 수입 : {:,} 유로".format(season_nums[season_count], tot_income))
+    print("인당 평균 이적료 수입 : {:,} 유로\n".format(avg_income))
+    print("총 방출 인원 : {} 명".format(tot_departure_nums))
+    print("FA 방출 인원 : {} 명".format(FA_departure_nums))
+    print("임대 이적 인원 : {} 명".format(Loan_departure_nums))
+    print("-----------------------")
+    
+
+yearly_transfer_arrangement(season_lists[2])
 """
-tot_spending = 0
-count = 0
-for i in range(len(RM_transfer_1415['이적료(유로)'])):
-    tot_spending = tot_spending + RM_transfer_1415['이적료(유로)'].iloc[i]
-    count += 1
-    
-    if (RM_transfer_1415['이적료(유로)'].iloc[i] > 0):
-        tot_spending = tot_spending - RM_transfer_1415['이적료(유로)'].iloc[i]
-        count -= 1
-
-tot_spending = tot_spending * -1
-avg_spending = tot_spending / count
-
-print("총 이적료", tot_spending)
-print(avg_spending)
-print(len(RM_transfer_1415['이적료(유로)']))
-#print(mean_calculator(RM_transfer_1415))
+"""    
+for i in range(len(season_lists)):
+    yearly_transfer_arrangement(season_lists[i])
 """

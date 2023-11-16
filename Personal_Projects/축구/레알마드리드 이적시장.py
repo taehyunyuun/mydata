@@ -32,11 +32,16 @@ season_count = 0
 
 # 시즌별로 지출과 수입을 저장할 리스트 생성
 spending_totals = []
+M_spending_totals = []
+
 income_totals = []
+M_income_totals = []
 
 for df in season_lists:
+    
     tot_spending = 0
     tot_income = 0
+    
     spending_count = 0
     income_count = 0
     
@@ -59,19 +64,22 @@ for df in season_lists:
     
     # 시즌별로 지출과 수입을 저장
     spending_totals.append(tot_spending)
+    M_spending_totals.append(tot_spending / 1e6)
+    
     income_totals.append(tot_income)
+    M_income_totals.append(tot_income / 1e6)
+    
 
     print("-----------------------")
-    print("{} 시즌 총 이적료 지출 : {:,} 유로".format(season_nums[season_count], tot_spending))
-    print("인당 평균 이적료 지출 : {:,} 유로\n".format(avg_spending))
+    print("{} 시즌 총 이적료 지출 : {:,} 유로 ({}M 유로)\n".format(season_nums[season_count], tot_spending, M_spending_totals[season_count]))
     
     print("총 영입 인원 : {} 명".format(spending_count))
     print("FA 영입 인원 : {} 명".format(FA_arrival_nums))
     print("임대 영입 인원 : {} 명".format(Loan_arrival_nums))
     print("유스 콜업 인원 : {} 명\n".format(Callup_nums))
 
-    print("{} 시즌 총 이적료 수입 : {:,} 유로".format(season_nums[season_count], tot_income))
-    print("인당 평균 이적료 수입 : {:,} 유로\n".format(avg_income))
+    print("{} 시즌 총 이적료 수입 : {:,} 유로 ({}M 유로)\n".format(season_nums[season_count], tot_income, M_income_totals[season_count]))
+
     print("총 방출 인원 : {} 명".format(tot_departure_nums))
     print("FA 방출 인원 : {} 명".format(FA_departure_nums))
     print("임대 이적 인원 : {} 명".format(Loan_departure_nums))
@@ -82,15 +90,18 @@ width = 0.35
 x = np.arange(len(season_nums))
 
 fig, ax = plt.subplots(figsize=(12, 6))
-rects1 = ax.bar(x - width/2, spending_totals, width, label='이적료 지출', color='red')
-rects2 = ax.bar(x + width/2, income_totals, width, label='이적료 수입', color='blue')
+rects1 = ax.bar(x - width/2, M_spending_totals, width, label='이적료 지출', color='red')
+rects2 = ax.bar(x + width/2, M_income_totals, width, label='이적료 수입', color='blue')
 
 ax.set_xlabel('시즌')
-ax.set_ylabel('이적료(유로)')
+ax.set_ylabel('이적료(백만 유로)')
 ax.set_title('시즌별 이적료 지출 및 수입')
 ax.set_xticks(x)
 ax.set_xticklabels(season_nums)
 ax.legend()
+
+# y 축 레이블 형식 변경 (백만 단위로 표시)
+ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: '{:,.0f}M'.format(x)))
 
 plt.xticks(rotation=45)
 plt.tight_layout()

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 from matplotlib.ticker import FuncFormatter
@@ -36,16 +37,7 @@ RM_transfer_2122 = pd.read_csv(file_paths[7], header=2)
 RM_transfer_2223 = pd.read_csv(file_paths[8], header=2)
 RM_transfer_2324 = pd.read_csv(file_paths[9], header=2)
 
-season_lists = [RM_transfer_1415,
-                RM_transfer_1516,
-                RM_transfer_1617,
-                RM_transfer_1718,
-                RM_transfer_1819,
-                RM_transfer_1920,
-                RM_transfer_2021,
-                RM_transfer_2122,
-                RM_transfer_2223,
-                RM_transfer_2324]
+season_lists = [pd.read_csv(file_path, header=2) for file_path in file_paths]
 
 season_count = 0
 
@@ -88,3 +80,22 @@ for df in season_lists:
     print("임대 이적 인원 : {} 명".format(Loan_departure_nums))
     print("-----------------------")
     season_count += 1
+
+width = 0.35
+x = np.arange(len(season_nums))
+
+fig, ax = plt.subplots(figsize=(12, 6))
+rects1 = ax.bar(x - width/2, tot_spending, width, label='이적료 지출', color='red')
+rects2 = ax.bar(x + width/2, tot_income, width, label='이적료 수입', color='blue')
+
+ax.set_xlabel('시즌')
+ax.set_ylabel('이적료(유로)')
+ax.set_title('시즌별 이적료 지출 및 수입')
+ax.set_xticks(x)
+ax.set_xticklabels(season_nums)
+ax.legend()
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+
+plt.show()

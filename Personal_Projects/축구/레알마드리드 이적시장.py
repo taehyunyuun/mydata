@@ -26,20 +26,13 @@ file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
 # 시즌 숫자를 문자열 형태로 리스트에 저장
 season_nums = [re.findall(r'\d+', path)[-1] for path in file_paths]
 
-RM_transfer_1415 = pd.read_csv(file_paths[0], header=2)
-RM_transfer_1516 = pd.read_csv(file_paths[1], header=2)
-RM_transfer_1617 = pd.read_csv(file_paths[2], header=2)
-RM_transfer_1718 = pd.read_csv(file_paths[3], header=2)
-RM_transfer_1819 = pd.read_csv(file_paths[4], header=2)
-RM_transfer_1920 = pd.read_csv(file_paths[5], header=2)
-RM_transfer_2021 = pd.read_csv(file_paths[6], header=2)
-RM_transfer_2122 = pd.read_csv(file_paths[7], header=2)
-RM_transfer_2223 = pd.read_csv(file_paths[8], header=2)
-RM_transfer_2324 = pd.read_csv(file_paths[9], header=2)
-
 season_lists = [pd.read_csv(file_path, header=2) for file_path in file_paths]
 
 season_count = 0
+
+# 시즌별로 지출과 수입을 저장할 리스트 생성
+spending_totals = []
+income_totals = []
 
 for df in season_lists:
     tot_spending = 0
@@ -63,6 +56,10 @@ for df in season_lists:
     tot_departure_nums = len(df['이적료(유로)']) - spending_count
     FA_departure_nums = df[(df['이적 형태'] == 'Departure') & (df['기타'] == 'FA')].shape[0]
     Loan_departure_nums = df[(df['이적 형태'] == 'Departure') & (df['기타'] == 'Loan')].shape[0]
+    
+    # 시즌별로 지출과 수입을 저장
+    spending_totals.append(tot_spending)
+    income_totals.append(tot_income)
 
     print("-----------------------")
     print("{} 시즌 총 이적료 지출 : {:,} 유로".format(season_nums[season_count], tot_spending))
@@ -85,8 +82,8 @@ width = 0.35
 x = np.arange(len(season_nums))
 
 fig, ax = plt.subplots(figsize=(12, 6))
-rects1 = ax.bar(x - width/2, tot_spending, width, label='이적료 지출', color='red')
-rects2 = ax.bar(x + width/2, tot_income, width, label='이적료 수입', color='blue')
+rects1 = ax.bar(x - width/2, spending_totals, width, label='이적료 지출', color='red')
+rects2 = ax.bar(x + width/2, income_totals, width, label='이적료 수입', color='blue')
 
 ax.set_xlabel('시즌')
 ax.set_ylabel('이적료(유로)')

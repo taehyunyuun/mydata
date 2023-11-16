@@ -25,7 +25,6 @@ file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
 
 # 시즌 숫자를 문자열 형태로 리스트에 저장
 season_nums = [re.findall(r'\d+', path)[-1] for path in file_paths]
-
 season_lists = [pd.read_csv(file_path, header=2) for file_path in file_paths]
 
 season_count = 0
@@ -64,12 +63,11 @@ for df in season_lists:
     
     # 시즌별로 지출과 수입을 저장
     spending_totals.append(tot_spending)
-    M_spending_totals.append(tot_spending / 1e6)
+    M_spending_totals.append(tot_spending / 1e6) # 백만 단위
     
     income_totals.append(tot_income)
-    M_income_totals.append(tot_income / 1e6)
+    M_income_totals.append(tot_income / 1e6) # 백만 단위
     
-
     print("-----------------------")
     print("{} 시즌 총 이적료 지출 : {:,} 유로 ({}M 유로)\n".format(season_nums[season_count], tot_spending, M_spending_totals[season_count]))
     

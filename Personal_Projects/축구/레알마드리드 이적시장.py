@@ -121,14 +121,20 @@ print("{}시즌 {}".format(max_income_player_season, max_income_player))
 print("금액 : {:,.0f}M 유로".format(max_income_player_earn))
 print("-----------------------")
 
-results = {"시즌" : season_nums,
-           "총 이적료 지출(백만)" : M_spending_totals,
-           "총 이적료 수입(백만)" : M_income_totals}
+# 결과 데이터를 데이터프레임으로 만듭니다.
+results = {
+    "시즌": season_nums,
+    "총 이적료 지출(백만)": M_spending_totals,
+    "총 이적료 수입(백만)": M_income_totals
+}
 
-results = pd.DataFrame(results)
+df_results = pd.DataFrame(results)
 
+# 결과 데이터프레임을 엑셀 파일로 내보냅니다.
 excel_output_file_path = "C:/Users/yth21/Desktop/TH/data/Football/results/results.xlsx"
-df.to_excel(excel_output_file_path, index=False)
+df_results.to_excel(excel_output_file_path, index=False, encoding='utf-8-sig')  # 'utf-8-sig'는 한글 깨짐 방지용
+
+print("결과 데이터를 엑셀 파일로 저장했습니다.")
 
 width = 0.35
 x = np.arange(len(season_nums))

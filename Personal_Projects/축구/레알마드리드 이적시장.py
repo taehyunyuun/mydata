@@ -11,16 +11,16 @@ font = font_manager.FontProperties(fname=font_path).get_name()
 rc('font', family=font)
 
 # 데이터 경로
-file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1516.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1617.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1718.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1819.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1920.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2021.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2122.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2223.csv',
-              'C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_2324.csv']
+file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_1415.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_1516.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_1617.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_1718.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_1819.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_1920.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_2021.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_2122.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_2223.csv',
+              'C:/Users/yth21/Desktop/TH/data/Football/datas/RM_transfer_2324.csv']
 
 # 시즌 숫자를 문자열 형태로 리스트에 저장
 season_nums = [re.findall(r'\d+', path)[-1] for path in file_paths]
@@ -68,11 +68,9 @@ for df in season_lists:
     tot_spending = spending_data['이적료(유로)'].sum()
     tot_spending = tot_spending * -1
     spending_count = len(spending_data)
-    avg_spending = round(tot_spending / spending_count)
     
     tot_income = income_data['이적료(유로)'].sum()
     income_count = len(income_data)
-    avg_income = round(tot_income / income_count)
 
     FA_arrival_nums = spending_data[spending_data['기타'] == 'FA'].shape[0]
     Loan_arrival_nums = spending_data[spending_data['기타'] == 'Loan'].shape[0]
@@ -89,15 +87,22 @@ for df in season_lists:
     income_totals.append(tot_income)
     M_income_totals.append(tot_income / 1e6)
     
+    # 소수점 이하 0 제거
+    spending_totals = [int(num) if num == int(num) else num for num in spending_totals]
+    M_spending_totals = [int(num) if num == int(num) else num for num in M_spending_totals]
+    
+    income_totals = [int(num) if num == int(num) else num for num in income_totals]
+    M_income_totals = [int(num) if num == int(num) else num for num in M_income_totals]
+    
     print("-----------------------")
-    print("{} 시즌 총 이적료 지출 : {:,} 유로 ({}M 유로)\n".format(season_nums[season_count], tot_spending, M_spending_totals[season_count]))
+    print("{} 시즌 총 이적료 지출 : {:,.0f} 유로 ({:,}M 유로)\n".format(season_nums[season_count], tot_spending, M_spending_totals[season_count]))
     
     print("총 영입 인원 : {} 명".format(spending_count))
     print("FA 영입 인원 : {} 명".format(FA_arrival_nums))
     print("임대 영입 인원 : {} 명".format(Loan_arrival_nums))
     print("유스 콜업 인원 : {} 명\n".format(Callup_nums))
 
-    print("{} 시즌 총 이적료 수입 : {:,} 유로 ({}M 유로)\n".format(season_nums[season_count], tot_income, M_income_totals[season_count]))
+    print("{} 시즌 총 이적료 수입 : {:,.0f} 유로 ({:,}M 유로)\n".format(season_nums[season_count], tot_income, M_income_totals[season_count]))
 
     print("총 방출 인원 : {} 명".format(tot_departure_nums))
     print("FA 방출 인원 : {} 명".format(FA_departure_nums))
@@ -116,6 +121,15 @@ print("{}시즌 {}".format(max_income_player_season, max_income_player))
 print("금액 : {:,.0f}M 유로".format(max_income_player_earn))
 print("-----------------------")
 
+results = {"시즌" : season_nums,
+           "총 이적료 지출(백만)" : M_spending_totals,
+           "총 이적료 수입(백만)" : M_income_totals}
+
+results = pd.DataFrame(results)
+
+excel_output_file_path = "C:/Users/yth21/Desktop/TH/data/Football/results/results.xlsx"
+df.to_excel(excel_output_file_path, index=False)
+
 width = 0.35
 x = np.arange(len(season_nums))
 
@@ -125,7 +139,8 @@ rects2 = ax.bar(x + width/2, M_income_totals, width, label='이적료 수입', c
 
 ax.set_xlabel('시즌')
 ax.set_ylabel('이적료(백만 유로)')
-ax.set_title('최근 10시즌 이적료 지출 및 수입 (1415 ~ 2324 시즌)')
+title = '{} ~ {} 시즌'.format(season_nums[0], season_nums[-1])
+ax.set_title(f'최근 10시즌 이적료 지출 및 수입 ({title})')
 ax.set_xticks(x)
 ax.set_xticklabels(season_nums)
 ax.legend()
@@ -136,4 +151,5 @@ ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: '{:,.0f}M'.format(x)))
 plt.xticks(rotation=45)
 plt.tight_layout()
 
+plt.savefig(f"C:/Users/yth21/Desktop/TH/data/Football/results/{title}.png", dpi=300)
 plt.show()

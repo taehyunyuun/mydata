@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 from matplotlib.ticker import FuncFormatter
-import os
 import re
 
 # 폰트 설정
@@ -27,6 +26,10 @@ file_paths = ['C:/Users/yth21/Desktop/TH/data/Football/RM_transfer_1415.csv',
 season_nums = [re.findall(r'\d+', path)[-1] for path in file_paths]
 season_lists = [pd.read_csv(file_path, header=2) for file_path in file_paths]
 
+# 시즌 컬럼 추가
+for i, season_df in enumerate(season_lists):
+    season_df['시즌'] = season_nums[i]
+
 season_count = 0
 
 # 시즌별로 지출과 수입을 저장할 리스트 생성
@@ -36,6 +39,20 @@ M_spending_totals = []
 income_totals = []
 M_income_totals = []
 
+# 모든 시즌의 데이터를 하나의 데이터프레임으로
+all_season_data = pd.concat(season_lists, ignore_index=True)
+
+# 최대 지출과 최대 수입을 얻은 선수 찾기
+max_spending_player = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].min()]['선수 이름'].values[0]
+max_spending_player_spend = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].min()]['이적료(유로)'].values[0]
+max_spending_player_spend = max_spending_player_spend * -1 / 1e6
+max_spending_player_season = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].min()]['시즌'].values[0]
+
+max_income_player = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].max()]['선수 이름'].values[0]
+max_income_player_earn = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].max()]['이적료(유로)'].values[0]
+max_income_player_earn = max_income_player_earn / 1e6
+max_income_player_season = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].max()]['시즌'].values[0]
+
 for df in season_lists:
     
     tot_spending = 0
@@ -44,29 +61,33 @@ for df in season_lists:
     spending_count = 0
     income_count = 0
     
-    tot_spending = df[df['이적 형태'] == 'Arrival']['이적료(유로)'].sum()
+    # 지출과 수입 데이터 추출
+    spending_data = df[df['이적 형태'] == 'Arrival']
+    income_data = df[df['이적 형태'] == 'Departure']
+    
+    tot_spending = spending_data['이적료(유로)'].sum()
     tot_spending = tot_spending * -1
-    spending_count = len(df[df['이적 형태'] == 'Arrival']['이적료(유로)'])
+    spending_count = len(spending_data)
     avg_spending = round(tot_spending / spending_count)
     
-    tot_income = df[df['이적 형태'] == 'Departure']['이적료(유로)'].sum()
-    income_count = len(df[df['이적 형태'] == 'Departure']['이적료(유로)'])
+    tot_income = income_data['이적료(유로)'].sum()
+    income_count = len(income_data)
     avg_income = round(tot_income / income_count)
 
-    FA_arrival_nums = df[(df['이적 형태'] == 'Arrival') & (df['기타'] == 'FA')].shape[0]
-    Loan_arrival_nums = df[(df['이적 형태'] == 'Arrival') & (df['기타'] == 'Loan')].shape[0]
-    Callup_nums = df[(df['이적 형태'] == 'Arrival') & (df['기타'] == 'Call up')].shape[0]
+    FA_arrival_nums = spending_data[spending_data['기타'] == 'FA'].shape[0]
+    Loan_arrival_nums = spending_data[spending_data['기타'] == 'Loan'].shape[0]
+    Callup_nums = spending_data[spending_data['기타'] == 'Call up'].shape[0]
     
-    tot_departure_nums = len(df['이적료(유로)']) - spending_count
-    FA_departure_nums = df[(df['이적 형태'] == 'Departure') & (df['기타'] == 'FA')].shape[0]
-    Loan_departure_nums = df[(df['이적 형태'] == 'Departure') & (df['기타'] == 'Loan')].shape[0]
+    tot_departure_nums = len(df) - spending_count
+    FA_departure_nums = income_data[income_data['기타'] == 'FA'].shape[0]
+    Loan_departure_nums = income_data[income_data['기타'] == 'Loan'].shape[0]
     
     # 시즌별로 지출과 수입을 저장
     spending_totals.append(tot_spending)
-    M_spending_totals.append(tot_spending / 1e6) # 백만 단위
+    M_spending_totals.append(tot_spending / 1e6)
     
     income_totals.append(tot_income)
-    M_income_totals.append(tot_income / 1e6) # 백만 단위
+    M_income_totals.append(tot_income / 1e6)
     
     print("-----------------------")
     print("{} 시즌 총 이적료 지출 : {:,} 유로 ({}M 유로)\n".format(season_nums[season_count], tot_spending, M_spending_totals[season_count]))
@@ -80,9 +101,20 @@ for df in season_lists:
 
     print("총 방출 인원 : {} 명".format(tot_departure_nums))
     print("FA 방출 인원 : {} 명".format(FA_departure_nums))
-    print("임대 이적 인원 : {} 명".format(Loan_departure_nums))
+    print("임대 이적 인원 : {} 명".format(Loan_departure_nums))    
     print("-----------------------")
+    
     season_count += 1
+
+print("-----------------------")
+print("가장 큰 이적료 지출:")
+print("{}시즌 {}".format(max_spending_player_season, max_spending_player))
+print("금액 : {:,.0f}M 유로".format(max_spending_player_spend))
+
+print("\n가장 큰 이적료 수입:")
+print("{}시즌 {}".format(max_income_player_season, max_income_player))
+print("금액 : {:,.0f}M 유로".format(max_income_player_earn))
+print("-----------------------")
 
 width = 0.35
 x = np.arange(len(season_nums))
@@ -93,7 +125,7 @@ rects2 = ax.bar(x + width/2, M_income_totals, width, label='이적료 수입', c
 
 ax.set_xlabel('시즌')
 ax.set_ylabel('이적료(백만 유로)')
-ax.set_title('시즌별 이적료 지출 및 수입')
+ax.set_title('최근 10시즌 이적료 지출 및 수입 (1415 ~ 2324 시즌)')
 ax.set_xticks(x)
 ax.set_xticklabels(season_nums)
 ax.legend()

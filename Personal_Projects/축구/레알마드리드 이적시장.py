@@ -125,11 +125,11 @@ for df in season_lists:
     season_count += 1
 
 print("-----------------------")
-print("가장 큰 이적료 지출")
+print("가장 비싸게 산 선수")
 print("{}시즌 {}".format(max_spending_player_season, max_spending_player))
 print("금액 : {:,.0f}M 유로".format(max_spending_player_spend))
 
-print("\n가장 큰 이적료 수입")
+print("\n가장 비싸게 판 선수")
 print("{}시즌 {}".format(max_income_player_season, max_income_player))
 print("금액 : {:,.0f}M 유로".format(max_income_player_earn))
 print("-----------------------")

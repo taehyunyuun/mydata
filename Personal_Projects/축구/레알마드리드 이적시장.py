@@ -7,9 +7,7 @@ import re
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
-from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-from openpyxl.utils.dataframe import dataframe_to_rows
 
 # 폰트 설정
 font_path = "C:/Windows/Fonts/malgun.TTF"

@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 from matplotlib.ticker import FuncFormatter
 import re
+import openpyxl
+from openpyxl.drawing.image import Image
+from openpyxl.styles import Alignment
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 # 폰트 설정
 font_path = "C:/Windows/Fonts/malgun.TTF"
@@ -52,6 +58,15 @@ max_income_player = all_season_data[all_season_data['이적료(유로)'] == all_
 max_income_player_earn = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].max()]['이적료(유로)'].values[0]
 max_income_player_earn = max_income_player_earn / 1e6
 max_income_player_season = all_season_data[all_season_data['이적료(유로)'] == all_season_data['이적료(유로)'].max()]['시즌'].values[0]
+
+# 10년간 총 지출과 수입, 넷스펜딩 계산
+all_spending = all_season_data[all_season_data['이적료(유로)'] < 0]
+all_income = all_season_data[all_season_data['이적료(유로)'] > 0]
+
+all_spending = all_spending['이적료(유로)'].sum() * -1 / 1e6
+all_income = all_income['이적료(유로)'].sum() / 1e6
+
+all_net_spending = all_spending - all_income
 
 for df in season_lists:
     
@@ -121,20 +136,31 @@ print("{}시즌 {}".format(max_income_player_season, max_income_player))
 print("금액 : {:,.0f}M 유로".format(max_income_player_earn))
 print("-----------------------")
 
-# 결과 데이터를 데이터프레임으로 만듭니다.
+# 결과 데이터를 데이터프레임으로
 results = {
     "시즌": season_nums,
-    "총 이적료 지출(백만)": M_spending_totals,
-    "총 이적료 수입(백만)": M_income_totals
+    "총 이적료 지출(유로)": M_spending_totals,
+    "총 이적료 수입(유로)": M_income_totals,
 }
 
 df_results = pd.DataFrame(results)
 
-# 결과 데이터프레임을 엑셀 파일로 내보냅니다.
-excel_output_file_path = "C:/Users/yth21/Desktop/TH/data/Football/results/results.xlsx"
-df_results.to_excel(excel_output_file_path, index=False, encoding='utf-8-sig')  # 'utf-8-sig'는 한글 깨짐 방지용
+# 넷스펜딩 컬럼 추가
+df_results["넷스펜딩(유로)"] = df_results["총 이적료 지출(유로)"] - df_results["총 이적료 수입(유로)"]
 
-print("결과 데이터를 엑셀 파일로 저장했습니다.")
+# 전체 년도 데이터 행 추가
+all_row = {'시즌' : '합계', '총 이적료 지출(유로)' : all_spending, '총 이적료 수입(유로)' : all_income, '넷스펜딩(유로)' : all_net_spending}
+df_results = pd.concat([df_results, pd.DataFrame([all_row])], ignore_index=True)
+
+title = '{} ~ {} 시즌'.format(season_nums[0], season_nums[-1])
+
+# 단위 가시성(M) 추가
+df_results.iloc[:, 1:] = df_results.iloc[:, 1:].applymap(lambda x: f"{round(x,2)}M" if x.is_integer() else f"{round(x,2)}M")
+df_results = pd.DataFrame(df_results)
+
+# 결과 데이터프레임을 엑셀 파일로 저장
+excel_output_file_path = f"C:/Users/yth21/Desktop/TH/data/Football/results/{title}.xlsx"
+df_results.to_excel(excel_output_file_path, index=False)
 
 width = 0.35
 x = np.arange(len(season_nums))
@@ -144,8 +170,7 @@ rects1 = ax.bar(x - width/2, M_spending_totals, width, label='이적료 지출',
 rects2 = ax.bar(x + width/2, M_income_totals, width, label='이적료 수입', color='blue')
 
 ax.set_xlabel('시즌')
-ax.set_ylabel('이적료(백만 유로)')
-title = '{} ~ {} 시즌'.format(season_nums[0], season_nums[-1])
+ax.set_ylabel('이적료(유로)')
 ax.set_title(f'최근 10시즌 이적료 지출 및 수입 ({title})')
 ax.set_xticks(x)
 ax.set_xticklabels(season_nums)
@@ -159,3 +184,45 @@ plt.tight_layout()
 
 plt.savefig(f"C:/Users/yth21/Desktop/TH/data/Football/results/{title}.png", dpi=300)
 plt.show()
+
+# 엑셀 파일 로드
+wb = openpyxl.load_workbook(excel_output_file_path)
+
+# 활성 시트 선택
+ws = wb.active
+
+net_spending_idx = df_results.columns.get_loc('넷스펜딩(유로)') + 1
+
+# 넷스펜딩 셀 가시성 개선
+for row in ws.iter_rows(min_row=2, max_col=net_spending_idx, max_row=ws.max_row):
+    cell = row[net_spending_idx - 1]
+    cell_value = cell.value
+    numeric_part = re.search(r'-?\d+', cell_value).group()  # 숫자 부분 추출
+    value = int(numeric_part)
+    if value < 0:
+        cell.fill = PatternFill(start_color="87CEEB", end_color="87CEEB", fill_type="solid")  # 하늘색
+    elif value > 0:
+        cell.fill = PatternFill(start_color="FF6347", end_color="FF6347", fill_type="solid")  # 붉은색
+
+# 셀 가운데 정렬 및 셀 너비 조절
+for column in ws.columns:
+    max_length = 0
+    column_letter = column[0].column_letter
+    for cell in column:
+        try:
+            if len(str(cell.value)) > max_length:
+                max_length = len(cell.value)
+        except:
+            pass
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+    adjusted_width = (max_length + 2) * 1.5
+    ws.column_dimensions[column_letter].width = adjusted_width
+
+# 이미지 삽입
+img = Image(f"C:/Users/yth21/Desktop/TH/data/Football/results/{title}.png")
+img.width, img.height = 1000, 500
+
+# 이미지를 삽입할 셀 위치 설정 (예: A10)
+ws.add_image(img, "F1")
+
+wb.save(excel_output_file_path)

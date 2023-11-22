@@ -156,6 +156,10 @@ title = '{} ~ {} 시즌'.format(season_nums[0], season_nums[-1])
 df_results.iloc[:, 1:] = df_results.iloc[:, 1:].applymap(lambda x: f"{round(x,2)}M" if x.is_integer() else f"{round(x,2)}M")
 df_results = pd.DataFrame(df_results)
 
+# '나이' column에 대한 주요 통계 정보
+age_summary = all_season_data['나이'].describe()
+print(age_summary)
+
 # 결과 데이터프레임을 엑셀 파일로 저장
 excel_output_file_path = f"C:/Users/yth21/Desktop/TH/data/Football/results/{title}.xlsx"
 df_results.to_excel(excel_output_file_path, index=False)
